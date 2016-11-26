@@ -1,0 +1,1 @@
+bool fs_init();

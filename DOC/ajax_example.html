@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+    <html>
+        <head>
+            <title>ESP BMP180 web display</title>
+            <script>
+                function getTemperature() {
+                    nocache = "&nocache="+ Math.random() * 1000000;
+                    var request = new XMLHttpRequest();
+                    request.onreadystatechange = function() {
+                        if (this.readyState == 4) {
+                            if (this.status == 200) {
+                                if (this.responseText != null) {
+                                    document.getElementById("switch_txt").innerHTML = this.responseText;
+                                }
+                            }
+                        }
+                    }
+                    request.open("GET", "ajax_switch" + nocache, true);
+                    request.send(null);
+                    setTimeout('getTemperature()', 1000);
+                }
+            </script>
+        </head>
+        <body onload="getTemperature()">
+            <h1>ESP8266 BMP180 web server</h1>
+            <font color="#6a5acd">
+            <body bgcolor="#a0dFfe">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+            </div>
+            <div style="clear:both;"></div><p>                                               
+            <p id="switch_txt">BMPSTATUS/p>
+            <p>Example Display of BMP data</p>
+            <p><a href="http://www.esp8266.com">ESP8266 Support Forum</a></p>
+        </body>
+    </html>
