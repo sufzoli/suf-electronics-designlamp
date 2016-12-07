@@ -1,5 +1,7 @@
 #pragma once
-#define WIFI_TIMEOUT	20
+#include <user_interface.h>
+
+#define WIFI_TIMEOUT	60
 #define WIFI_AP_NAME_PREFIX "STANDLAMP"
 
 void wifi_off();

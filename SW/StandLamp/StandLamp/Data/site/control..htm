@@ -1,0 +1,59 @@
+<html>
+	<head>
+        <link rel="icon" href="about:blank" />
+		<script type="text/javascript">
+		var intStdColR =0;
+		var intStdColG =0;
+		var intStdColB =0;
+		function SetVal()
+		{
+			objStdColR = document.getElementById("stdcol_r");
+			objStdColG = document.getElementById("stdcol_g");
+			objStdColB = document.getElementById("stdcol_b");
+			if(intStdColR != objStdColR.value || intStdColG != objStdColG.value || intStdColB != objStdColB.value)
+			{
+			    intStdColR = objStdColR.value;
+			    intStdColG = objStdColG.value;
+			    intStdColB = objStdColB.value;
+			    var request = new XMLHttpRequest();
+			    // alert("/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
+			    request.open("GET", "/api/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
+			    request.send(null);
+            }
+		}
+		function SwitchLight(sw)
+		{
+		    var request = new XMLHttpRequest();
+		    // alert("/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
+		    request.open("GET", "/api/setval?sw=" + sw);
+		    request.send(null);
+		}
+		function SetColor(r,g,b)
+		{
+		    document.getElementById("stdcol_r").value = r;
+		    document.getElementById("stdcol_g").value = g;
+		    document.getElementById("stdcol_b").value = b;
+        }
+		window.setInterval(SetVal, 200);
+        // oninput="SetVal();" onchange="SetVal();" 
+		</script>
+	</head>
+	<body>
+		<form>
+            <input type="button" value="On" onclick="SwitchLight(1);" />
+            <input type="button" value="Jacob's ladder" onclick="SwitchLight(2);" />
+            <input type="button" value="Fire" onclick="SwitchLight(3);" />
+            <input type="button" value="Flash" onclick="SwitchLight(4);" />
+            <input type="button" value="Strobe" onclick="SwitchLight(5);" />
+            <input type="button" value="Off" onclick="SwitchLight(0);" /><br />
+			R <input type="range" min=0 max=255 step=1 id="stdcol_r" /> <input type="button" value="Red" onclick="SetColor(255,0,0)" /><br/>
+			G <input type="range" min=0 max=255 step=1 id="stdcol_g" /> <input type="button" value="Green" onclick="SetColor(0,255,0)" /><br/>
+			B <input type="range" min=0 max=255 step=1 id="stdcol_b" /> <input type="button" value="Blue" onclick="SetColor(0,0,255)" /><br/>
+            <input type="button" value="Full" onclick="SetColor(255,255,255)" />
+            <input type="button" value="Warm" onclick="SetColor(255,244,229)" />
+            <input type="button" value="Standard" onclick="SetColor(244,255,250)" />
+            <input type="button" value="Cool" onclick="SetColor(212,235,255)" />
+            <input type="button" value="Candle" onclick="SetColor(255,147,41)" />
+		</form>
+	</body>
+</html>
