@@ -20,6 +20,8 @@
 
 CRGB fastled_leds[FASTLED_NUM_PIX];
 
+bool light_State;
+
 void fastled_init()
 {
 	delay(3000); // sanity delay
@@ -69,6 +71,12 @@ void SetVal()
 #ifdef SERIAL_DEBUG
 	Serial.print("WEB: File request - ");
 	Serial.println(web_GetUri());
+/*
+	Serial.print("GPIO4: ");
+	Serial.print(digitalRead(4));
+	Serial.print(" GPIO5: ");
+	Serial.println(digitalRead(5));
+*/
 #endif
 	for (i = 0; i < server.args(); i++)
 	{
@@ -93,6 +101,7 @@ void SetVal()
 					break;
 				case 1:
 					lwcb = lwcb_FullLight;
+//					lwcb = lwcb_Fake;
 					break;
 				case 2:
 					lwcb = lwcb_Jacob;
@@ -125,6 +134,7 @@ void lwcb_Clear()
 	}
 	FastLED.show();
 	lwcb = lwcb_Empty;
+	light_State = false;
 }
 
 void lwcb_Empty() {}
@@ -157,6 +167,7 @@ void lwcb_Jacob()
 	{
 		jb_tc += FRAMERATE;
 	}
+	light_State = true;
 }
 
 // ******** Full light **********
@@ -168,7 +179,35 @@ void lwcb_FullLight()
 		fastled_leds[i].setRGB(stdRed, stdGreen, stdBlue);
 	}
 	FastLED.show();
+	light_State = true;
 }
+
+void lwcb_Fake()
+{
+	int i,j,k,width,empty;
+	width = FASTLED_NUM_PIX / 24;
+	empty = FASTLED_NUM_PIX / 6;
+	j = 0;
+	for (i = 0; i < FASTLED_NUM_PIX; i++)
+	{
+		fastled_leds[i] = CRGB::Black;
+	}
+	for (i = 0; i < 4; i++)
+	{
+		j += empty;
+		k = j + width;
+		fastled_leds[j-1].setRGB(255, 255, 255);
+		for (; j < k; j++)
+		{
+			fastled_leds[j].setRGB(255, 255, 255);
+		}
+		fastled_leds[j].setRGB(255, 255, 255);
+	}
+	FastLED.show();
+	lwcb = lwcb_Empty;
+	light_State = true;
+}
+
 
 void lwcb_Flash()
 {
@@ -209,6 +248,7 @@ void lwcb_Strobe()
 	{
 		strobe_state = 0;
 	}
+	light_State = true;
 }
 
 
@@ -291,6 +331,7 @@ void lwcb_Fire()
 	}
 	// Step 5.  Display it
 	FastLED.show();
+	light_State = true;
 }
 
 
@@ -304,4 +345,5 @@ void light_init()
 	SR_Setup();
 	SR_SetFull();
 	fastled_init();
+	light_State = false;
 }

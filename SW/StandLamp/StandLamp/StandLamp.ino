@@ -74,6 +74,9 @@ void setup()
 //	server.on("/setval", HTTP_GET, []() { server.send(200, "text/plain", ""); }, SetVal);
 //	server.on("/setval", HTTP_GET, []() { server.send(200, "text/plain", ""); }, []() { Serial.println(server.uri); });
 	light_init();
+
+//	pinMode(4, INPUT);
+//	pinMode(5, INPUT);
 }
 
 // the loop function runs over and over again until power down or reset
