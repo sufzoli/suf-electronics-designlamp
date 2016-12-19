@@ -10,6 +10,11 @@
 #include "sr.h"
 #include "Light.h"
 #include "Server.h"
+#include "FrameTimer.h"
+#include "Switch.h"
+#include "TermoSensor.h"
+
+#define LIGHT_LWCB_TAG "light_lwcb"
 
 #define FASTLED_PIN 14
 #define FASTLED_NUM_PIX 72
@@ -31,11 +36,12 @@ void fastled_init()
 
 
 // ****** Frame Timer ********
-#define FRAMERATE 50
+// #define FRAMERATE 50
 
-os_timer_t frame_TimerObj;
-bool frame_IsProcess;
+// os_timer_t frame_TimerObj;
+// bool frame_IsProcess;
 
+/*
 void frame_TimerCallback(void *pArg)
 {
 	frame_IsProcess = true;
@@ -47,12 +53,14 @@ void init_FrameTimer()
 	os_timer_setfn(&frame_TimerObj, frame_TimerCallback, NULL);
 	os_timer_arm(&frame_TimerObj, 1000 / FRAMERATE, true);
 }
+*/
 
-LightWorkerCallback *lwcb;
+// LightWorkerCallback *lwcb;
 int stdRed = 0;
 int stdGreen = 0;
 int stdBlue = 0;
 
+/*
 void light_Worker()
 {
 	if (frame_IsProcess)
@@ -64,6 +72,7 @@ void light_Worker()
 		// fire_Worker();
 	}
 }
+*/
 
 void SetVal()
 {
@@ -97,26 +106,33 @@ void SetVal()
 			switch (server.arg(i).toInt())
 			{
 				case 0:
-					lwcb = lwcb_Clear;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+					// lwcb = lwcb_Clear;
 					break;
 				case 1:
-					lwcb = lwcb_FullLight;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_FullLight);
+					// lwcb = lwcb_FullLight;
 //					lwcb = lwcb_Fake;
 					break;
 				case 2:
-					lwcb = lwcb_Jacob;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Jacob);
+					// lwcb = lwcb_Jacob;
 					break;
 				case 3:
-					lwcb = lwcb_Fire;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
+					// lwcb = lwcb_Fire;
 					break;
 				case 4:
-					lwcb = lwcb_Flash;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Flash);
+					// lwcb = lwcb_Flash;
 					break;
 				case 5:
-					lwcb = lwcb_Strobe;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Strobe);
+					// lwcb = lwcb_Strobe;
 					break;
 				default:
-					lwcb = lwcb_Clear;
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+					// lwcb = lwcb_Clear;
 				break;
 			}
 		}
@@ -133,7 +149,8 @@ void lwcb_Clear()
 		fastled_leds[i] = CRGB::Black;
 	}
 	FastLED.show();
-	lwcb = lwcb_Empty;
+	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
+	// lwcb = lwcb_Empty;
 	light_State = false;
 }
 
@@ -165,7 +182,7 @@ void lwcb_Jacob()
 	}
 	else
 	{
-		jb_tc += FRAMERATE;
+		jb_tc += FT_FRAMERATE;
 	}
 	light_State = true;
 }
@@ -204,7 +221,8 @@ void lwcb_Fake()
 		fastled_leds[j].setRGB(255, 255, 255);
 	}
 	FastLED.show();
-	lwcb = lwcb_Empty;
+	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
+	// lwcb = lwcb_Empty;
 	light_State = true;
 }
 
@@ -217,7 +235,8 @@ void lwcb_Flash()
 		fastled_leds[i].setRGB(255,255,255);
 	}
 	FastLED.show();
-	lwcb = lwcb_Clear;
+	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+	// lwcb = lwcb_Clear;
 }
 
 int strobe_state=0;
@@ -334,16 +353,34 @@ void lwcb_Fire()
 	light_State = true;
 }
 
+void light_switch()
+{
+	if (light_State)
+	{
+		ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+	}
+	else
+	{
+		ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fake);
+	}
+}
 
+void light_MyFire()
+{
+	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
+}
 
 
 void light_init()
 {
-	lwcb = lwcb_Empty;
+	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
+	// lwcb = lwcb_Empty;
 	web_RegisterGetUrl("/api/setval", SetVal);
-	init_FrameTimer();
+	// init_FrameTimer();
 	SR_Setup();
 	SR_SetFull();
 	fastled_init();
 	light_State = false;
+	switch_AddCallback(light_switch);
+	temp_AddCallback(light_MyFire);
 }

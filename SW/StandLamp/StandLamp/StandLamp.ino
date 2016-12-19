@@ -22,6 +22,9 @@
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
 
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 #include <FastLED.h>
 
 #include "main.h"
@@ -31,6 +34,9 @@
 #include "Settings.h"
 #include "Server.h"
 #include "Light.h"
+#include "FrameTimer.h"
+#include "Switch.h"
+#include "TermoSensor.h"
 
 /*
 void SetVal()
@@ -73,7 +79,10 @@ void setup()
 	web_Init();
 //	server.on("/setval", HTTP_GET, []() { server.send(200, "text/plain", ""); }, SetVal);
 //	server.on("/setval", HTTP_GET, []() { server.send(200, "text/plain", ""); }, []() { Serial.println(server.uri); });
+	ft_Init();
 	light_init();
+	switch_Init();
+	temp_Init();
 
 //	pinMode(4, INPUT);
 //	pinMode(5, INPUT);
@@ -83,5 +92,6 @@ void setup()
 void loop()
 {
 	web_Worker();
-	light_Worker();
+	// light_Worker();
+	ft_Worker();
 }

@@ -1,0 +1,6 @@
+# KiCAD
+*-cache.lib
+*.kicad_pcb-bak
+*.bak
+Controller/
+LED Stripe NeoB/
