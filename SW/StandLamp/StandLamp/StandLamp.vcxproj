@@ -77,6 +77,9 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Data\site\control..htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="StandLamp.ino">
       <FileType>CppCode</FileType>
     </None>

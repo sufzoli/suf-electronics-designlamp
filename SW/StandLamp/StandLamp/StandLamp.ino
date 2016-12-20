@@ -4,6 +4,8 @@
  Author:	zoli
 */
 
+#define VERSION "1.0b1"
+
 #include <FS.h>
 #include <user_interface.h>
 #include <IPAddress.h>
@@ -49,6 +51,12 @@ void SetVal()
 }
 */
 
+void GetVer()
+{
+	server.send(200, "text/plain", VERSION);
+}
+
+
 // the setup function runs once when you press reset or power the board
 void setup()
 {
@@ -83,6 +91,8 @@ void setup()
 	light_init();
 	switch_Init();
 	temp_Init();
+
+	web_RegisterGetUrl("/api/ver", GetVer);
 
 //	pinMode(4, INPUT);
 //	pinMode(5, INPUT);

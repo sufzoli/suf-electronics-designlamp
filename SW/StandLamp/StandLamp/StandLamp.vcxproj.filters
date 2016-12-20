@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="StandLamp.ino" />
+    <None Include="Data\site\control..htm" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.StandLamp.vsarduino.h">
