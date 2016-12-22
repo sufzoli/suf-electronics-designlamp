@@ -1,41 +1,96 @@
+<!DOCTYPE html>
 <html>
 	<head>
         <link rel="icon" href="about:blank" />
 		<script type="text/javascript">
-		var intStdColR =0;
-		var intStdColG =0;
-		var intStdColB =0;
-		function SetVal()
-		{
-			objStdColR = document.getElementById("stdcol_r");
-			objStdColG = document.getElementById("stdcol_g");
-			objStdColB = document.getElementById("stdcol_b");
-			if(intStdColR != objStdColR.value || intStdColG != objStdColG.value || intStdColB != objStdColB.value)
-			{
-			    intStdColR = objStdColR.value;
-			    intStdColG = objStdColG.value;
-			    intStdColB = objStdColB.value;
-			    var request = new XMLHttpRequest();
-			    // alert("/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
-			    request.open("GET", "/api/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
-			    request.send(null);
+		    var intStdColR =0;
+		    var intStdColG =0;
+		    var intStdColB = 0;
+		    var intFireCooling = 55;
+		    var intFireSparking = 120;
+		    window.onload = function () {
+		        var request = new XMLHttpRequest();
+		        request.onreadystatechange = function () {
+		            if(this.readyState == 4 && this.status == 200)
+		            {
+		                objStdColR = document.getElementById("stdcol_r");
+		                objStdColG = document.getElementById("stdcol_g");
+		                objStdColB = document.getElementById("stdcol_b");
+		                objFireCooling = document.getElementById("fire_cooling");
+		                objFireSparking = document.getElementById("fire_sparking");
+		                var xmlDoc = this.responseXML;
+		                intStdColR = parseInt(xmlDoc.getElementsByTagName("stdcol_r")[0].childNodes[0].nodeValue);
+		                intStdColG = parseInt(xmlDoc.getElementsByTagName("stdcol_g")[0].childNodes[0].nodeValue);
+		                intStdColB = parseInt(xmlDoc.getElementsByTagName("stdcol_b")[0].childNodes[0].nodeValue);
+		                intFireCooling = parseInt(xmlDoc.getElementsByTagName("fire_cooling")[0].childNodes[0].nodeValue);
+		                intFireSparking = parseInt(xmlDoc.getElementsByTagName("fire_sparking")[0].childNodes[0].nodeValue);
+		                objStdColR.value = intStdColR;
+		                objStdColG.value = intStdColG;
+		                objStdColB.value = intStdColB;
+		                objFireCooling.value = intFireCooling;
+		                objFireSparking.value = intFireSparking;
+                    }
+		        }
+		        request.open("POST", "/api/setval",true);
+		        request.send(null);
+		    }
+
+		    function GetVal(xml)
+		    {
+		        var xmlDoc = xml.responseXML;
+		        alert(xmlDoc.getElementsByTagName("stdcol_r")[0].childNodes[0].nodeValue);
+		    }
+		    function SetVal()
+		    {
+		        var params;
+			    objStdColR = document.getElementById("stdcol_r");
+			    objStdColG = document.getElementById("stdcol_g");
+			    objStdColB = document.getElementById("stdcol_b");
+			    objFireCooling = document.getElementById("fire_cooling");
+			    objFireSparking = document.getElementById("fire_sparking");
+			    if (intStdColR != objStdColR.value || intStdColG != objStdColG.value || intStdColB != objStdColB.value || intFireCooling != objFireCooling.value || intFireSparking != objFireSparking.value)
+			    {
+			        intStdColR = objStdColR.value;
+			        intStdColG = objStdColG.value;
+			        intStdColB = objStdColB.value;
+			        intFireCooling = objFireCooling.value;
+			        intFireSparking = objFireSparking.value;
+			        var request = new XMLHttpRequest();
+
+                    /*
+			        request.open("GET", "/api/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB + "&firecooling=" + intFireCooling + "&firesparking=" + intFireSparking);
+			        request.send(null);
+                    */
+			        params = "stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB + "&firecooling=" + intFireCooling + "&firesparking=" + intFireSparking;
+			        request.open("POST", "/api/setval", true);
+			        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			        request.setRequestHeader("Content-length", params.length);
+			        request.setRequestHeader("Connection", "close");
+			        request.send(params);
+                }
+		    }
+		    function SwitchLight(sw)
+		    {
+		        var params = "sw=" + sw;
+		        var request = new XMLHttpRequest();
+		        request.open("POST", "/api/setval", true);
+		        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		        request.setRequestHeader("Content-length", params.length);
+		        request.setRequestHeader("Connection", "close");
+		        request.send(params);
+                /*
+		        request.open("GET", "/api/setval?sw=" + sw);
+		        request.send(null);
+                */
+		    }
+		    function SetColor(r,g,b)
+		    {
+		        document.getElementById("stdcol_r").value = r;
+		        document.getElementById("stdcol_g").value = g;
+		        document.getElementById("stdcol_b").value = b;
             }
-		}
-		function SwitchLight(sw)
-		{
-		    var request = new XMLHttpRequest();
-		    // alert("/setval?stdcolr=" + intStdColR + "&stdcolg=" + intStdColG + "&stdcolb=" + intStdColB);
-		    request.open("GET", "/api/setval?sw=" + sw);
-		    request.send(null);
-		}
-		function SetColor(r,g,b)
-		{
-		    document.getElementById("stdcol_r").value = r;
-		    document.getElementById("stdcol_g").value = g;
-		    document.getElementById("stdcol_b").value = b;
-        }
-		window.setInterval(SetVal, 200);
-        // oninput="SetVal();" onchange="SetVal();" 
+		    window.setInterval(SetVal, 200);
+            // oninput="SetVal();" onchange="SetVal();" 
 		</script>
 	</head>
 	<body>
@@ -55,5 +110,10 @@
             <input type="button" value="Cool" onclick="SetColor(212,235,255)" />
             <input type="button" value="Candle" onclick="SetColor(255,147,41)" />
 		</form>
+        Fire Settings
+        <form>
+			COOLING <input type="range" min=20 max=100 step=1 id="fire_cooling" /><br/>
+			SPARKING <input type="range" min=50 max=200 step=1 id="fire_sparking" /><br/>
+        </form>
 	</body>
 </html>

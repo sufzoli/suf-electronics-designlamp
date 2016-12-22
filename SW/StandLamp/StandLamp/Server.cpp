@@ -254,6 +254,11 @@ void web_RegisterGetUrl(const char* uri, std::function<void(void)> ufn)
 	server.on(uri, HTTP_GET, ufn);
 }
 
+void web_RegisterPostUrl(const char* uri, std::function<void(void)> ufn)
+{
+	server.on(uri, HTTP_POST, ufn);
+}
+
 String web_GetUri()
 {
 	return server.uri();

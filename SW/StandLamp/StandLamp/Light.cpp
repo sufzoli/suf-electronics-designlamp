@@ -74,72 +74,7 @@ void light_Worker()
 }
 */
 
-void SetVal()
-{
-	int i;
-#ifdef SERIAL_DEBUG
-	Serial.print("WEB: File request - ");
-	Serial.println(web_GetUri());
-/*
-	Serial.print("GPIO4: ");
-	Serial.print(digitalRead(4));
-	Serial.print(" GPIO5: ");
-	Serial.println(digitalRead(5));
-*/
-#endif
-	for (i = 0; i < server.args(); i++)
-	{
-		if (server.argName(i) == "stdcolr")
-		{
-			stdRed = server.arg(i).toInt();
-		}
-		if (server.argName(i) == "stdcolg")
-		{
-			stdGreen = server.arg(i).toInt();
-		}
-		if (server.argName(i) == "stdcolb")
-		{
-			stdBlue = server.arg(i).toInt();
-		}
-		if (server.argName(i) == "sw")
-		{
-			switch (server.arg(i).toInt())
-			{
-				case 0:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
-					// lwcb = lwcb_Clear;
-					break;
-				case 1:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_FullLight);
-					// lwcb = lwcb_FullLight;
-//					lwcb = lwcb_Fake;
-					break;
-				case 2:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Jacob);
-					// lwcb = lwcb_Jacob;
-					break;
-				case 3:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
-					// lwcb = lwcb_Fire;
-					break;
-				case 4:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Flash);
-					// lwcb = lwcb_Flash;
-					break;
-				case 5:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Strobe);
-					// lwcb = lwcb_Strobe;
-					break;
-				default:
-					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
-					// lwcb = lwcb_Clear;
-				break;
-			}
-		}
-	}
-	server.send(200, "text/plain", "");
-	
-}
+
 
 void lwcb_Clear()
 {
@@ -152,6 +87,7 @@ void lwcb_Clear()
 	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
 	// lwcb = lwcb_Empty;
 	light_State = false;
+	temp_Enabled(true);
 }
 
 void lwcb_Empty() {}
@@ -185,6 +121,7 @@ void lwcb_Jacob()
 		jb_tc += FT_FRAMERATE;
 	}
 	light_State = true;
+	temp_Enabled(false);
 }
 
 // ******** Full light **********
@@ -197,6 +134,7 @@ void lwcb_FullLight()
 	}
 	FastLED.show();
 	light_State = true;
+	temp_Enabled(false);
 }
 
 void lwcb_Fake()
@@ -224,6 +162,7 @@ void lwcb_Fake()
 	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
 	// lwcb = lwcb_Empty;
 	light_State = true;
+	temp_Enabled(false);
 }
 
 
@@ -268,6 +207,7 @@ void lwcb_Strobe()
 		strobe_state = 0;
 	}
 	light_State = true;
+	temp_Enabled(false);
 }
 
 
@@ -306,12 +246,12 @@ void lwcb_Strobe()
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
 // Default 50, suggested range 20-100 
-#define COOLING  55
+int fireCooling = 55;
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
-#define SPARKING 120
+int fireSparking = 120;
 
 bool gReverseDirection = false;
 
@@ -322,7 +262,7 @@ void lwcb_Fire()
 
 	// Step 1.  Cool down every cell a little
 	for (int i = 0; i < FASTLED_NUM_PIX; i++) {
-		heat[i] = qsub8(heat[i], random8(0, ((COOLING * 10) / FASTLED_NUM_PIX) + 2));
+		heat[i] = qsub8(heat[i], random8(0, ((fireCooling * 10) / FASTLED_NUM_PIX) + 2));
 	}
 
 	// Step 2.  Heat from each cell drifts 'up' and diffuses a little
@@ -331,7 +271,7 @@ void lwcb_Fire()
 	}
 
 	// Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-	if (random8() < SPARKING) {
+	if (random8() < fireSparking) {
 		int y = random8(7);
 		heat[y] = qadd8(heat[y], random8(160, 255));
 	}
@@ -351,6 +291,7 @@ void lwcb_Fire()
 	// Step 5.  Display it
 	FastLED.show();
 	light_State = true;
+	temp_Enabled(false);
 }
 
 void light_switch()
@@ -370,12 +311,88 @@ void light_MyFire()
 	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
 }
 
+void SetVal()
+{
+	int i;
+	String xml;
+#ifdef SERIAL_DEBUG
+	Serial.print("WEB: File request - ");
+	Serial.println(web_GetUri());
+	/*
+	Serial.print("GPIO4: ");
+	Serial.print(digitalRead(4));
+	Serial.print(" GPIO5: ");
+	Serial.println(digitalRead(5));
+	*/
+#endif
+	for (i = 0; i < server.args(); i++)
+	{
+		if (server.argName(i) == "stdcolr")
+		{
+			stdRed = server.arg(i).toInt();
+		}
+		if (server.argName(i) == "stdcolg")
+		{
+			stdGreen = server.arg(i).toInt();
+		}
+		if (server.argName(i) == "stdcolb")
+		{
+			stdBlue = server.arg(i).toInt();
+		}
+		if (server.argName(i) == "firecooling")
+		{
+			fireCooling = server.arg(i).toInt();
+		}
+		if (server.argName(i) == "firesparking")
+		{
+			fireSparking = server.arg(i).toInt();
+		}
+		if (server.argName(i) == "sw")
+		{
+			switch (server.arg(i).toInt())
+			{
+			case 0:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+				break;
+			case 1:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_FullLight);
+				break;
+			case 2:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Jacob);
+				break;
+			case 3:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
+				break;
+			case 4:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Flash);
+				break;
+			case 5:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Strobe);
+				break;
+			default:
+				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+				break;
+			}
+		}
+	}
+	xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+	xml += "<DesignLamp>";
+	xml += "<stdcol_r>" + String(stdRed) + "</stdcol_r>";
+	xml += "<stdcol_g>" + String(stdGreen) + "</stdcol_g>";
+	xml += "<stdcol_b>" + String(stdBlue) + "</stdcol_b>";
+	xml += "<fire_cooling>" + String(fireCooling) + "</fire_cooling>";
+	xml += "<fire_sparking>" + String(fireSparking) + "</fire_sparking>";
+	xml += "</DesignLamp>";
+	
+	server.send(200, "text/xml", xml);
+}
+
 
 void light_init()
 {
 	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Empty);
 	// lwcb = lwcb_Empty;
-	web_RegisterGetUrl("/api/setval", SetVal);
+	web_RegisterPostUrl("/api/setval", SetVal);
 	// init_FrameTimer();
 	SR_Setup();
 	SR_SetFull();
@@ -383,4 +400,5 @@ void light_init()
 	light_State = false;
 	switch_AddCallback(light_switch);
 	temp_AddCallback(light_MyFire);
+	temp_Enabled(true);
 }

@@ -1,0 +1,14 @@
+- Feature: Cooling Sparking control
+- Bug: DS18B20 read timing
+Feature: Capture portal
+Feature: Siren
+Feature: VU Meter
+- Feature: OTA
+Feature: WEB Design
+Feature: Save settings
+- Feature: AJAX read setting at control page load
+Feature: Default page
+Feature: NTP
+Feature: MQTT
+Feature: Power consumption
+Feature: Fire color

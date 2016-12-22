@@ -6,4 +6,5 @@ void web_Init();
 void web_Worker();
 // void web_RegisterUrl(const char* uri, HTTPMethod method, std::function<void(void)> ufn);
 void web_RegisterGetUrl(const char* uri, std::function<void(void)> ufn);
+void web_RegisterPostUrl(const char* uri, std::function<void(void)> ufn);
 String web_GetUri();
