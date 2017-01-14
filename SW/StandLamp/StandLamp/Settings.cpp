@@ -77,3 +77,8 @@ String settings_getValue(String section, String key)
 {
 	return _settings["/" + section + "/" + key];
 }
+
+void settings_saveConfig()
+{
+
+}
