@@ -4,7 +4,7 @@
  Author:	zoli
 */
 
-#define VERSION "1.0b8"
+#define VERSION "1.0b13"
 
 #include <FS.h>
 #include <user_interface.h>

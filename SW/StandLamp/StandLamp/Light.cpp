@@ -210,6 +210,49 @@ void lwcb_Strobe()
 	temp_Enabled(false);
 }
 
+#define LIGHT_SIREN_ROTATION 200
+
+byte light_siren_pos;
+int light_siren_frame_pos;
+
+void lwcb_Siren()
+{
+	int i;
+	temp_Enabled(false);
+	if (light_siren_frame_pos == 0)
+	{
+		// clear
+		for (i = 0; i< FASTLED_NUM_PIX; i++)
+		{
+			fastled_leds[i].setRGB(0,0,0);
+		}
+		FastLED.show();
+
+		// Reset frame counter
+		light_siren_frame_pos = LIGHT_SIREN_ROTATION;
+
+		// shift the position
+		// light_siren_pos <<= 1;
+		// if overflowed reset to one
+		if (light_siren_pos == 0)
+		{
+			light_siren_pos = 1;
+		}
+		// set the position
+		SR_Set(light_siren_pos);
+		// set color
+		for (i = 0; i< FASTLED_NUM_PIX; i++)
+		{
+			fastled_leds[i].setRGB(stdRed, stdGreen, stdBlue);
+		}
+		FastLED.show();
+	}
+	else
+	{
+		light_siren_frame_pos--;
+	}
+}
+
 
 // ******* Fire ********
 
@@ -311,6 +354,8 @@ void light_MyFire()
 	ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
 }
 
+int light_sw_prev = 0;
+
 void SetVal()
 {
 	int i;
@@ -349,29 +394,40 @@ void SetVal()
 		}
 		if (server.argName(i) == "sw")
 		{
-			switch (server.arg(i).toInt())
+			if (light_sw_prev != server.arg(i).toInt())
 			{
-			case 0:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
-				break;
-			case 1:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_FullLight);
-				break;
-			case 2:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Jacob);
-				break;
-			case 3:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
-				break;
-			case 4:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Flash);
-				break;
-			case 5:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Strobe);
-				break;
-			default:
-				ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
-				break;
+				SR_SetFull();
+				switch (server.arg(i).toInt())
+				{
+				case 0:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+					break;
+				case 1:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_FullLight);
+					break;
+				case 2:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Jacob);
+					break;
+				case 3:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Fire);
+					break;
+				case 4:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Flash);
+					break;
+				case 5:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Strobe);
+					break;
+				case 6:
+					light_siren_pos = 1;
+					light_siren_frame_pos = LIGHT_SIREN_ROTATION;
+					lwcb_Clear();
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Siren);
+					break;
+				default:
+					ft_AddCallback(LIGHT_LWCB_TAG, lwcb_Clear);
+					break;
+				}
+				light_sw_prev = server.arg(i).toInt();
 			}
 		}
 	}
